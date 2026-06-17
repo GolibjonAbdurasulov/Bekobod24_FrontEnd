@@ -28,7 +28,7 @@ export default function AdminProducts() {
   };
   useEffect(() => { load(); }, [filterStore]);
 
-  const storeCategories = categories.filter((c) => String(c.storeId) === form.storeId);
+  const storeCategories = categories.filter((c) => form.storeId && String(c.storeId) === form.storeId);
 
   const uploadImage = async (file: File) => {
     setUploading(true);
@@ -131,13 +131,13 @@ export default function AdminProducts() {
       {modal && (
         <AdminModal title={editing ? "Mahsulotni tahrirlash" : "Yangi mahsulot"} onClose={() => setModal(false)} onSave={save} saving={saving}>
           {!editing && (
-            <FormField label="Do'kon" value={form.storeId} onChange={(v) => { setForm((p: any) => ({ ...p, storeId: v, productCategoryId: "" })); }} as="select" required>
+            <FormField label="Do'kon" value={form.storeId} onChange={f("storeId")} as="select" required>
               <option value="">Tanlang...</option>
               {stores.map((s: any) => <option key={s.id} value={s.id}>{s.name}</option>)}
             </FormField>
           )}
           <FormField label="Kategoriya" value={form.productCategoryId} onChange={f("productCategoryId")} as="select">
-            <option value="">Tanlanmagan</option>
+            <option value="">{editing ? "Tanlanmagan" : form.storeId ? "Kategoriya tanlang..." : "Avval do'konni tanlang"}</option>
             {storeCategories.map((c: any) => <option key={c.id} value={c.id}>{c.name}</option>)}
           </FormField>
           <FormField label="Nomi" value={form.name} onChange={f("name")} placeholder="Mahsulot nomi" required />

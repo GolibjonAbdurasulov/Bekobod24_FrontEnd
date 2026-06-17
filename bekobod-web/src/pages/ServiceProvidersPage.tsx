@@ -2,49 +2,197 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { api } from "../api/client";
 
-const CAT_LABELS: Record<string, string> = {
-  elektrik: "Elektrik", santexnik: "Santexnik",
-  usta: "Usta", farrosh: "Farrosh",
-  haydovchi: "Haydovchi", bogbon: "Bog'bon",
+interface Service {
+  id: string | number;
+  name: string;
+  description?: string;
+  storeName?: string;
+  price: number;
+  phone?: string;          // "+998901234567" formatda
+  telegramUsername?: string; // "@username" yoki "username"
+  requiresBooking?: boolean;
+  categoryId?: string;
+}
+
+const CAT_LABELS: Record<string, { label: string; icon: string }> = {
+  elektrik:   { label: "Elektrik",   icon: "⚡" },
+  santexnik:  { label: "Santexnik",  icon: "🔧" },
+  usta:       { label: "Usta",       icon: "🪚" },
+  farrosh:    { label: "Farrosh",    icon: "🧹" },
+  haydovchi:  { label: "Haydovchi",  icon: "🚗" },
+  bogbon:     { label: "Bog'bon",    icon: "🌿" },
 };
+
+function cleanPhone(phone: string): string {
+  // "+998 90 123 45 67" → "+998901234567"
+  return phone.replace(/\s+/g, "");
+}
+
+function cleanTg(username: string): string {
+  // "@username" → "username"
+  return username.replace(/^@/, "");
+}
+
+type ContactSheet = { service: Service } | null;
 
 export default function ServiceProvidersPage() {
   const { categoryId } = useParams<{ categoryId: string }>();
   const nav = useNavigate();
-  const [services, setServices] = useState<any[]>([]);
+  const [services, setServices] = useState<Service[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [contactSheet, setContactSheet] = useState<ContactSheet>(null);
+
+  const catInfo = CAT_LABELS[categoryId ?? ""] ?? { label: "Xizmatlar", icon: "🔧" };
 
   useEffect(() => {
-    api.get("/Service/GetAll").then((r) => setServices(r.data)).catch(() => setServices([]));
-  }, []);
+    api.get<Service[]>(`/Service/GetAll${categoryId ? `?category=${categoryId}` : ""}`)
+      .then((r) => setServices(r.data))
+      .catch(() => setServices([]))
+      .finally(() => setLoading(false));
+  }, [categoryId]);
+
+  const hasContact = (s: Service) => !!(s.phone || s.telegramUsername);
 
   return (
-    <div className="page">
-      <div className="page-header">
-        <button className="back-btn" onClick={() => nav("/services")}>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
-        </button>
-        <div className="page-title">{CAT_LABELS[categoryId ?? ""] ?? "Xizmatlar"}</div>
+    <>
+      <div className="page">
+        <div className="page-header">
+          <button className="back-btn" onClick={() => nav("/services")}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <path d="M19 12H5M12 5l-7 7 7 7" />
+            </svg>
+          </button>
+          <div className="page-title">{catInfo.icon} {catInfo.label}</div>
+        </div>
+
+        <div style={{ padding: "12px 16px", display: "flex", flexDirection: "column", gap: 10 }}>
+          {loading ? (
+            <div className="empty-state"><span className="ei">⏳</span><p>Yuklanmoqda...</p></div>
+          ) : services.length === 0 ? (
+            <div className="empty-state"><span className="ei">🔧</span><p>Xizmatlar topilmadi</p></div>
+          ) : (
+            services.map((s) => (
+              <div key={s.id} className="provider-card">
+                {/* Avatar */}
+                <div className="provider-avatar">
+                  <span>{catInfo.icon}</span>
+                </div>
+
+                {/* Info */}
+                <div className="provider-info" style={{ flex: 1, minWidth: 0 }}>
+                  <div className="pname" style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                    {s.name}
+                  </div>
+                  {s.description && (
+                    <div className="pdesc" style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                      {s.description}
+                    </div>
+                  )}
+                  <div className="pprice">{Number(s.price).toLocaleString()} so'm</div>
+                </div>
+
+                {/* Tugma */}
+                {hasContact(s) ? (
+                  <button
+                    onClick={() => setContactSheet({ service: s })}
+                    style={{
+                      flexShrink: 0,
+                      padding: "8px 14px",
+                      borderRadius: 12,
+                      border: "none",
+                      background: "#2563EB",
+                      color: "white",
+                      fontWeight: 600,
+                      fontSize: 13,
+                      cursor: "pointer",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    Bog'lanish
+                  </button>
+                ) : s.requiresBooking ? (
+                  <span style={{ fontSize: 11, color: "#D97706", background: "#FFF7ED", padding: "4px 8px", borderRadius: 8, fontWeight: 600, whiteSpace: "nowrap", flexShrink: 0 }}>
+                    Bron talab
+                  </span>
+                ) : null}
+              </div>
+            ))
+          )}
+        </div>
       </div>
 
-      <div style={{ padding: "12px 16px", display: "flex", flexDirection: "column", gap: 10 }}>
-        {services.length === 0
-          ? <div className="empty-state"><span className="ei">🔧</span><p>Xizmatlar topilmadi</p></div>
-          : services.map((s: any) => (
-            <div key={s.id} className="product-card">
-              <div className="product-info">
-                <div className="name">{s.name}</div>
-                {s.storeName && <div className="desc">{s.storeName}</div>}
-                {s.description && <div className="desc">{s.description}</div>}
-                <div className="price">{Number(s.price).toLocaleString()} so'm</div>
-              </div>
-              {s.requiresBooking && (
-                <span style={{ fontSize: 11, color: "#D97706", background: "#FFF7ED", padding: "4px 8px", borderRadius: 8, fontWeight: 600, whiteSpace: "nowrap" }}>
-                  Bron talab
-                </span>
-              )}
+      {/* Contact bottom sheet */}
+      {contactSheet && (
+        <div
+          className="modal-overlay"
+          onClick={() => setContactSheet(null)}
+        >
+          <div
+            className="modal-sheet"
+            style={{ maxWidth: 480, width: "100%" }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="modal-handle" />
+
+            <div style={{ fontWeight: 700, fontSize: 17, marginBottom: 4 }}>
+              {contactSheet.service.name}
             </div>
-          ))}
-      </div>
-    </div>
+            {contactSheet.service.description && (
+              <div style={{ fontSize: 13, color: "#6B7280", marginBottom: 16 }}>
+                {contactSheet.service.description}
+              </div>
+            )}
+            <div style={{ fontSize: 15, fontWeight: 700, color: "#2563EB", marginBottom: 20 }}>
+              {Number(contactSheet.service.price).toLocaleString()} so'm
+            </div>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              {contactSheet.service.phone && (
+                <a
+                  href={`tel:${cleanPhone(contactSheet.service.phone)}`}
+                  style={{
+                    display: "flex", alignItems: "center", gap: 12,
+                    padding: "14px 16px", borderRadius: 14,
+                    background: "#EFF6FF", textDecoration: "none",
+                    color: "#1d4ed8", fontWeight: 600, fontSize: 15,
+                  }}
+                >
+                  <span style={{ fontSize: 22 }}>📞</span>
+                  <span>{contactSheet.service.phone}</span>
+                </a>
+              )}
+
+              {contactSheet.service.telegramUsername && (
+                <a
+                  href={`https://t.me/${cleanTg(contactSheet.service.telegramUsername)}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  style={{
+                    display: "flex", alignItems: "center", gap: 12,
+                    padding: "14px 16px", borderRadius: 14,
+                    background: "#EFF6FF", textDecoration: "none",
+                    color: "#1d4ed8", fontWeight: 600, fontSize: 15,
+                  }}
+                >
+                  <span style={{ fontSize: 22 }}>✈️</span>
+                  <span>@{cleanTg(contactSheet.service.telegramUsername)}</span>
+                </a>
+              )}
+
+              <button
+                onClick={() => setContactSheet(null)}
+                style={{
+                  marginTop: 4, padding: "13px", borderRadius: 14,
+                  border: "1.5px solid #E5E7EB", background: "white",
+                  color: "#6B7280", fontWeight: 600, fontSize: 15, cursor: "pointer",
+                }}
+              >
+                Yopish
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }

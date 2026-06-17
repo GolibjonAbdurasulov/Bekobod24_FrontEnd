@@ -43,7 +43,11 @@ export default function CartPage() {
         <span style={{ fontSize: 72 }}>🎉</span>
         <h2 style={{ fontWeight: 700, fontSize: 22 }}>Buyurtma qabul qilindi!</h2>
         <p style={{ color: "#6B7280", fontSize: 14 }}>Kuryer tez orada yetkazib beradi.</p>
-        <button className="checkout-btn" style={{ marginTop: 16, borderRadius: 14, justifyContent: "center" }} onClick={() => nav("/orders")}>
+        <button
+          className="checkout-btn"
+          style={{ marginTop: 16, borderRadius: 14, justifyContent: "center" }}
+          onClick={() => nav("/orders")}
+        >
           Buyurtmalarimni ko'rish
         </button>
       </div>
@@ -58,7 +62,10 @@ export default function CartPage() {
       <div className="empty-state">
         <span className="ei">🛒</span>
         <p>Savat bo'sh</p>
-        <button onClick={() => nav("/")} style={{ marginTop: 8, background: "#2563EB", color: "white", border: "none", borderRadius: 12, padding: "10px 24px", fontWeight: 600, cursor: "pointer" }}>
+        <button
+          onClick={() => nav("/")}
+          style={{ marginTop: 8, background: "#2563EB", color: "white", border: "none", borderRadius: 12, padding: "10px 24px", fontWeight: 600, cursor: "pointer" }}
+        >
           Xarid qilish
         </button>
       </div>
@@ -66,7 +73,8 @@ export default function CartPage() {
   );
 
   return (
-    <div className="page" style={{ paddingBottom: 160 }}>
+    /* has-checkout: checkout-bar + BottomNav ikkalasi uchun joy */
+    <div className="page has-checkout">
       <div className="page-header">
         <div className="page-title">🛒 Savat</div>
       </div>
@@ -90,17 +98,28 @@ export default function CartPage() {
         <div style={{ background: "white", borderRadius: 16, padding: 16, marginTop: 4, display: "flex", flexDirection: "column", gap: 12 }}>
           <div>
             <label className="form-label">Yetkazib berish manzili</label>
-            <input type="text" className="form-input" placeholder="Ko'cha, uy raqami..."
-              value={address} onChange={(e) => setAddress(e.target.value)} />
+            <input
+              type="text"
+              className="form-input"
+              placeholder="Ko'cha, uy raqami..."
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+            />
           </div>
           <div>
             <label className="form-label">Izoh (ixtiyoriy)</label>
-            <textarea className="form-input" rows={2} placeholder="Qo'shimcha xohishlar..."
-              value={note} onChange={(e) => setNote(e.target.value)} />
+            <textarea
+              className="form-input"
+              rows={2}
+              placeholder="Qo'shimcha xohishlar..."
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+            />
           </div>
         </div>
       </div>
 
+      {/* checkout-bar — BottomNav ustida, z-index: 45 */}
       <div className="checkout-bar">
         <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, color: "#6B7280", marginBottom: 8, padding: "0 4px" }}>
           <span>{cart.count()} ta mahsulot</span>
