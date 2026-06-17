@@ -10,7 +10,7 @@ const TYPE_MAP: Record<string, { title: string; icon: string; storeType: number 
 };
 
 function imgUrl(item: any) {
-  if (item.imageUrl && !item.imageUrl.startsWith("http://localhost")) return item.imageUrl;
+  if (item.imageUrl && item.imageUrl.startsWith("https://")) return item.imageUrl;
   if (!item.imageId) return null;
   return `${FILE_URL}/${item.imageId}`;
 }

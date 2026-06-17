@@ -3,6 +3,7 @@ import AdminGuard from "./AdminGuard";
 import AdminOrders from "./AdminOrders";
 import AdminStores from "./AdminStores";
 import AdminProducts from "./AdminProducts";
+import AdminProductCategories from "./AdminProductCategories";
 import AdminServices from "./AdminServices";
 import AdminUsers from "./AdminUsers";
 
@@ -10,6 +11,7 @@ const TABS = [
   { key: "orders",   label: "Buyurtmalar",      icon: "📋" },
   { key: "stores",   label: "Do'konlar",         icon: "🏪" },
   { key: "products", label: "Mahsulotlar",       icon: "📦" },
+  { key: "categories", label: "Kategoriyalar",   icon: "📂" },
   { key: "services", label: "Xizmatlar",         icon: "🔧" },
   { key: "users",    label: "Foydalanuvchilar",  icon: "👥" },
 ];
@@ -65,8 +67,9 @@ export default function AdminPage() {
         <div style={{ padding: "12px" }}>
           {tab === "orders"   && <AdminOrders />}
           {tab === "stores"   && <AdminStores />}
-          {tab === "products" && <AdminProducts />}
-          {tab === "services" && <AdminServices />}
+          {tab === "products"   && <AdminProducts />}
+          {tab === "categories" && <AdminProductCategories />}
+          {tab === "services"   && <AdminServices />}
           {tab === "users"    && <AdminUsers />}
         </div>
       </div>

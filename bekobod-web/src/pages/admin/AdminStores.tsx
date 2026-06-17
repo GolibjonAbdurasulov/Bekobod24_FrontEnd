@@ -18,7 +18,7 @@ const TYPE_ICONS: Record<string, string> = {
 const empty = { name: "", type: "1", isActive: true, imageId: "" };
 
 function imgUrl(store: any) {
-  if (store.imageUrl && !store.imageUrl.startsWith("http://localhost")) return store.imageUrl;
+  if (store.imageUrl && store.imageUrl.startsWith("https://")) return store.imageUrl;
   if (!store.imageId) return null;
   return `${FILE_URL}/${store.imageId}`;
 }
@@ -49,7 +49,7 @@ export default function AdminStores() {
     try {
       const fd = new FormData();
       fd.append("file", file);
-      const res = await api.post("/File/UploadFileAsync", fd);
+      const res = await api.post("/File/UploadFile", fd);
       const id = res.data?.data?.id ?? res.data?.id;
       if (id) setForm((p: any) => ({ ...p, imageId: id }));
     } catch { alert("Rasm yuklashda xatolik"); }

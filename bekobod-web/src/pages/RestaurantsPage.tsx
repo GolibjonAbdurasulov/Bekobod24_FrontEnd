@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { api, FILE_URL } from "../api/client";
 
 function imgUrl(store: any) {
-  if (store.imageUrl && !store.imageUrl.startsWith("http://localhost")) return store.imageUrl;
+  if (store.imageUrl && store.imageUrl.startsWith("https://")) return store.imageUrl;
   if (!store.imageId) return null;
   return `${FILE_URL}/${store.imageId}`;
 }

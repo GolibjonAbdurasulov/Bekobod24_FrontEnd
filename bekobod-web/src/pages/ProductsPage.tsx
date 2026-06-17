@@ -4,7 +4,7 @@ import { api, FILE_URL } from "../api/client";
 import { useCartStore } from "../store/CartStore";
 
 function imgUrl(product: any) {
-  if (product.imageUrl && !product.imageUrl.startsWith("http://localhost")) return product.imageUrl;
+  if (product.imageUrl && product.imageUrl.startsWith("https://")) return product.imageUrl;
   if (!product.imageId) return null;
   return `${FILE_URL}/${product.imageId}`;
 }
