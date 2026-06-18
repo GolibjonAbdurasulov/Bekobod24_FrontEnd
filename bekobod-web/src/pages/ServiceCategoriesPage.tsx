@@ -1,40 +1,92 @@
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { api, FILE_URL } from "../api/client";
 
-const SERVICE_CATS = [
-  { id: "elektrik",   name: "Elektrik",   icon: "⚡", desc: "Elektr ishlari" },
-  { id: "santexnik",  name: "Santexnik",  icon: "🔧", desc: "Suv ta'minoti" },
-  { id: "usta",       name: "Usta",       icon: "🪚", desc: "Qurilish, ta'mirlash" },
-  { id: "farrosh",    name: "Farrosh",    icon: "🧹", desc: "Tozalash xizmati" },
-  { id: "haydovchi",  name: "Haydovchi",  icon: "🚗", desc: "Yuklarni tashish" },
-  { id: "bogbon",     name: "Bog'bon",    icon: "🌿", desc: "Bog' parvarishi" },
-];
+interface ServiceCategory {
+  id: number | string;
+  name: string;
+  description?: string;
+  icon?: string;       // emoji yoki null
+  imageId?: string;
+  imageUrl?: string;
+}
+
+// Kategoriya nomiga qarab fallback emoji
+const ICON_MAP: Record<string, string> = {
+  elektrik:  "⚡", electrician: "⚡",
+  santexnik: "🔧", plumber: "🔧",
+  usta:      "🪚", builder: "🪚",
+  farrosh:   "🧹", cleaner: "🧹",
+  haydovchi: "🚗", driver: "🚗",
+  bogbon:    "🌿", gardener: "🌿",
+};
+
+function catIcon(c: ServiceCategory): string {
+  if (c.icon) return c.icon;
+  const key = c.name.toLowerCase().replace(/[^a-z]/g, "");
+  return ICON_MAP[key] ?? "🔧";
+}
+
+function imgUrl(c: ServiceCategory): string | null {
+  if (c.imageUrl && c.imageUrl.startsWith("https://")) return c.imageUrl;
+  if (!c.imageId) return null;
+  return `${FILE_URL}/${c.imageId}`;
+}
 
 export default function ServiceCategoriesPage() {
   const nav = useNavigate();
+  const [categories, setCategories] = useState<ServiceCategory[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    api.get<ServiceCategory[]>("/ServiceCategory/GetAll")
+      .then((r) => setCategories(r.data))
+      .catch(() => setCategories([]))
+      .finally(() => setLoading(false));
+  }, []);
 
   return (
     <div className="page">
       <div className="page-header">
         <button className="back-btn" onClick={() => nav("/")}>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+            <path d="M19 12H5M12 5l-7 7 7 7" />
+          </svg>
         </button>
         <div className="page-title">🔧 Xizmatlar</div>
       </div>
 
       <div style={{ padding: "12px 16px" }}>
-        <div className="category-grid">
-          {SERVICE_CATS.map((c) => (
-            <div key={c.id} className="cat-card" onClick={() => nav(`/services/${c.id}`)}>
-              <div className="cat-icon" style={{ background: "#FFF1F2" }}>
-                <span style={{ fontSize: 28 }}>{c.icon}</span>
-              </div>
-              <div>
-                <div className="cat-title">{c.name}</div>
-                <div className="cat-desc">{c.desc}</div>
-              </div>
-            </div>
-          ))}
-        </div>
+        {loading ? (
+          <div className="empty-state"><span className="ei">⏳</span><p>Yuklanmoqda...</p></div>
+        ) : categories.length === 0 ? (
+          <div className="empty-state"><span className="ei">🔧</span><p>Kategoriyalar topilmadi</p></div>
+        ) : (
+          <div className="category-grid">
+            {categories.map((c) => {
+              const url = imgUrl(c);
+              const icon = catIcon(c);
+              return (
+                <div
+                  key={c.id}
+                  className="cat-card"
+                  onClick={() => nav(`/services/${c.id}`)}
+                >
+                  <div className="cat-icon" style={{ background: "#FFF1F2", overflow: "hidden" }}>
+                    {url
+                      ? <img src={url} alt={c.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                      : <span style={{ fontSize: 28 }}>{icon}</span>
+                    }
+                  </div>
+                  <div>
+                    <div className="cat-title">{c.name}</div>
+                    {c.description && <div className="cat-desc">{c.description}</div>}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
     </div>
   );

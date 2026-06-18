@@ -5,15 +5,17 @@ import AdminStores from "./AdminStores";
 import AdminProducts from "./AdminProducts";
 import AdminProductCategories from "./AdminProductCategories";
 import AdminServices from "./AdminServices";
+import AdminServiceCategories from "./AdminServiceCategories";
 import AdminUsers from "./AdminUsers";
 
 const TABS = [
-  { key: "orders",   label: "Buyurtmalar",      icon: "📋" },
-  { key: "stores",   label: "Do'konlar",         icon: "🏪" },
-  { key: "products", label: "Mahsulotlar",       icon: "📦" },
-  { key: "categories", label: "Kategoriyalar",   icon: "📂" },
-  { key: "services", label: "Xizmatlar",         icon: "🔧" },
-  { key: "users",    label: "Foydalanuvchilar",  icon: "👥" },
+  { key: "orders",      label: "Buyurtmalar",       icon: "📋" },
+  { key: "stores",      label: "Do'konlar",          icon: "🏪" },
+  { key: "products",    label: "Mahsulotlar",        icon: "📦" },
+  { key: "categories",  label: "Mahsulot kat.",      icon: "📂" },
+  { key: "services",    label: "Xizmatlar",          icon: "🔧" },
+  { key: "svcats",      label: "Xizmat kat.",        icon: "🗂️" },
+  { key: "users",       label: "Foydalanuvchilar",   icon: "👥" },
 ];
 
 export default function AdminPage() {
@@ -23,7 +25,6 @@ export default function AdminPage() {
     <AdminGuard>
       <div style={{ background: "#F3F4F6", minHeight: "100dvh", paddingBottom: 16 }}>
 
-        {/* Header */}
         <div style={{
           background: "linear-gradient(135deg,#1e3a8a,#1d4ed8)",
           padding: "16px 16px 14px",
@@ -33,7 +34,6 @@ export default function AdminPage() {
           <div style={{ color: "white", fontWeight: 800, fontSize: 18, marginTop: 2 }}>⚙️ Admin Panel</div>
         </div>
 
-        {/* Tab bar */}
         <div style={{
           background: "white",
           display: "flex",
@@ -63,14 +63,14 @@ export default function AdminPage() {
           ))}
         </div>
 
-        {/* Content */}
         <div style={{ padding: "12px" }}>
-          {tab === "orders"   && <AdminOrders />}
-          {tab === "stores"   && <AdminStores />}
+          {tab === "orders"     && <AdminOrders />}
+          {tab === "stores"     && <AdminStores />}
           {tab === "products"   && <AdminProducts />}
           {tab === "categories" && <AdminProductCategories />}
           {tab === "services"   && <AdminServices />}
-          {tab === "users"    && <AdminUsers />}
+          {tab === "svcats"     && <AdminServiceCategories />}
+          {tab === "users"      && <AdminUsers />}
         </div>
       </div>
     </AdminGuard>

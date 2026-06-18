@@ -2,34 +2,45 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { api } from "../api/client";
 
+interface ServiceCategory {
+  id: number | string;
+  name: string;
+  icon?: string;
+  description?: string;
+}
+
 interface Service {
-  id: string | number;
+  id: number | string;
   name: string;
   description?: string;
   storeName?: string;
   price: number;
-  phone?: string;          // "+998901234567" formatda
-  telegramUsername?: string; // "@username" yoki "username"
+  phone?: string;
+  telegramUsername?: string;
   requiresBooking?: boolean;
-  categoryId?: string;
+  categoryId?: number | string;
 }
 
-const CAT_LABELS: Record<string, { label: string; icon: string }> = {
-  elektrik:   { label: "Elektrik",   icon: "⚡" },
-  santexnik:  { label: "Santexnik",  icon: "🔧" },
-  usta:       { label: "Usta",       icon: "🪚" },
-  farrosh:    { label: "Farrosh",    icon: "🧹" },
-  haydovchi:  { label: "Haydovchi",  icon: "🚗" },
-  bogbon:     { label: "Bog'bon",    icon: "🌿" },
+// Kategoriya nomiga qarab fallback emoji
+const ICON_MAP: Record<string, string> = {
+  elektrik: "⚡", electrician: "⚡",
+  santexnik: "🔧", plumber: "🔧",
+  usta: "🪚", builder: "🪚",
+  farrosh: "🧹", cleaner: "🧹",
+  haydovchi: "🚗", driver: "🚗",
+  bogbon: "🌿", gardener: "🌿",
 };
 
-function cleanPhone(phone: string): string {
-  // "+998 90 123 45 67" → "+998901234567"
-  return phone.replace(/\s+/g, "");
+function resolveCatIcon(name: string, icon?: string): string {
+  if (icon) return icon;
+  const key = name.toLowerCase().replace(/[^a-z]/g, "");
+  return ICON_MAP[key] ?? "🔧";
 }
 
+function cleanPhone(phone: string): string {
+  return phone.replace(/\s+/g, "");
+}
 function cleanTg(username: string): string {
-  // "@username" → "username"
   return username.replace(/^@/, "");
 }
 
@@ -38,19 +49,29 @@ type ContactSheet = { service: Service } | null;
 export default function ServiceProvidersPage() {
   const { categoryId } = useParams<{ categoryId: string }>();
   const nav = useNavigate();
+
+  const [category, setCategory] = useState<ServiceCategory | null>(null);
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
   const [contactSheet, setContactSheet] = useState<ContactSheet>(null);
 
-  const catInfo = CAT_LABELS[categoryId ?? ""] ?? { label: "Xizmatlar", icon: "🔧" };
-
   useEffect(() => {
-    api.get<Service[]>(`/Service/GetAll${categoryId ? `?category=${categoryId}` : ""}`)
+    if (!categoryId) return;
+
+    // Kategoriya ma'lumotini olish (nom va icon uchun)
+    api.get<ServiceCategory>(`/ServiceCategory/GetById/${categoryId}`)
+      .then((r) => setCategory(r.data))
+      .catch(() => setCategory(null));
+
+    // Kategoriyaga tegishli servicelar
+    api.get<Service[]>(`/Service/GetAll?categoryId=${categoryId}`)
       .then((r) => setServices(r.data))
       .catch(() => setServices([]))
       .finally(() => setLoading(false));
   }, [categoryId]);
 
+  const catIcon = category ? resolveCatIcon(category.name, category.icon) : "🔧";
+  const catName = category?.name ?? "Xizmatlar";
   const hasContact = (s: Service) => !!(s.phone || s.telegramUsername);
 
   return (
@@ -62,23 +83,24 @@ export default function ServiceProvidersPage() {
               <path d="M19 12H5M12 5l-7 7 7 7" />
             </svg>
           </button>
-          <div className="page-title">{catInfo.icon} {catInfo.label}</div>
+          <div className="page-title">{catIcon} {catName}</div>
         </div>
 
         <div style={{ padding: "12px 16px", display: "flex", flexDirection: "column", gap: 10 }}>
           {loading ? (
             <div className="empty-state"><span className="ei">⏳</span><p>Yuklanmoqda...</p></div>
           ) : services.length === 0 ? (
-            <div className="empty-state"><span className="ei">🔧</span><p>Xizmatlar topilmadi</p></div>
+            <div className="empty-state">
+              <span className="ei">{catIcon}</span>
+              <p>Bu kategoriyada xizmat topilmadi</p>
+            </div>
           ) : (
             services.map((s) => (
               <div key={s.id} className="provider-card">
-                {/* Avatar */}
                 <div className="provider-avatar">
-                  <span>{catInfo.icon}</span>
+                  <span>{catIcon}</span>
                 </div>
 
-                {/* Info */}
                 <div className="provider-info" style={{ flex: 1, minWidth: 0 }}>
                   <div className="pname" style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                     {s.name}
@@ -91,27 +113,23 @@ export default function ServiceProvidersPage() {
                   <div className="pprice">{Number(s.price).toLocaleString()} so'm</div>
                 </div>
 
-                {/* Tugma */}
                 {hasContact(s) ? (
                   <button
                     onClick={() => setContactSheet({ service: s })}
                     style={{
-                      flexShrink: 0,
-                      padding: "8px 14px",
-                      borderRadius: 12,
-                      border: "none",
-                      background: "#2563EB",
-                      color: "white",
-                      fontWeight: 600,
-                      fontSize: 13,
-                      cursor: "pointer",
-                      whiteSpace: "nowrap",
+                      flexShrink: 0, padding: "8px 14px", borderRadius: 12,
+                      border: "none", background: "#2563EB", color: "white",
+                      fontWeight: 600, fontSize: 13, cursor: "pointer", whiteSpace: "nowrap",
                     }}
                   >
                     Bog'lanish
                   </button>
                 ) : s.requiresBooking ? (
-                  <span style={{ fontSize: 11, color: "#D97706", background: "#FFF7ED", padding: "4px 8px", borderRadius: 8, fontWeight: 600, whiteSpace: "nowrap", flexShrink: 0 }}>
+                  <span style={{
+                    fontSize: 11, color: "#D97706", background: "#FFF7ED",
+                    padding: "4px 8px", borderRadius: 8, fontWeight: 600,
+                    whiteSpace: "nowrap", flexShrink: 0,
+                  }}>
                     Bron talab
                   </span>
                 ) : null}
@@ -123,10 +141,7 @@ export default function ServiceProvidersPage() {
 
       {/* Contact bottom sheet */}
       {contactSheet && (
-        <div
-          className="modal-overlay"
-          onClick={() => setContactSheet(null)}
-        >
+        <div className="modal-overlay" onClick={() => setContactSheet(null)}>
           <div
             className="modal-sheet"
             style={{ maxWidth: 480, width: "100%" }}
@@ -138,12 +153,12 @@ export default function ServiceProvidersPage() {
               {contactSheet.service.name}
             </div>
             {contactSheet.service.description && (
-              <div style={{ fontSize: 13, color: "#6B7280", marginBottom: 16 }}>
+              <div style={{ fontSize: 13, color: "#6B7280", marginBottom: 12 }}>
                 {contactSheet.service.description}
               </div>
             )}
             <div style={{ fontSize: 15, fontWeight: 700, color: "#2563EB", marginBottom: 20 }}>
-              {Number(contactSheet.service.price).toLocaleString()} so'm
+              {Number(contactSheet.service.price).toLocaleString()} so'm/soat
             </div>
 
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
