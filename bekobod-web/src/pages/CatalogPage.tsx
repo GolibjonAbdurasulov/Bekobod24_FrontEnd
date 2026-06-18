@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { api, FILE_URL } from "../api/client";
-import { useCartStore } from "../store/CartStore";
+import { useCartStore, type CartStore } from "../store/CartStore";
 
 const TYPE_MAP: Record<string, { title: string; icon: string; storeType: number }> = {
   market:      { title: "Market",      icon: "🛒", storeType: 1 },
@@ -50,7 +50,7 @@ function ProductList({
 }: {
   products: Product[];
   loading: boolean;
-  cart: ReturnType<typeof useCartStore>;
+  cart: CartStore;
   storeId: string;
   storeName: string;
 }) {

@@ -10,7 +10,7 @@ export type CartItem = {
   storeName?: string;
 };
 
-type S = {
+export type CartStore = {
   items: CartItem[];
   add: (item: Omit<CartItem, "quantity">) => void;
   inc: (id: string) => void;
@@ -21,7 +21,7 @@ type S = {
   count: () => number;
 };
 
-export const useCartStore = create<S>()(
+export const useCartStore = create<CartStore>()(
   persist(
     (set, get) => ({
       items: [],
