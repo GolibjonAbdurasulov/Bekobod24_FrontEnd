@@ -34,7 +34,7 @@ export default function AdminServiceCategories() {
   const openCreate = () => { setEditing(null); setForm(empty); setModal(true); };
   const openEdit = (c: any) => {
     setEditing(c);
-    setForm({ name: c.name, description: c.description ?? "", icon: c.icon ?? "", imageId: c.imageId ?? "" });
+    setForm({ name: c.categoryName, description: c.description ?? "", icon: c.icon ?? "", imageId: c.imageId ?? "" });
     setModal(true);
   };
 
@@ -91,11 +91,11 @@ export default function AdminServiceCategories() {
         <div key={c.id} style={{ background: "white", borderRadius: 14, padding: 14, boxShadow: "0 1px 4px rgba(0,0,0,0.07)", display: "flex", alignItems: "center", gap: 12 }}>
           <div style={{ width: 44, height: 44, borderRadius: 12, background: "#FFF1F2", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24, flexShrink: 0, overflow: "hidden" }}>
             {c.imageId
-              ? <img src={`${FILE_URL}/${c.imageId}`} alt={c.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} onError={(e) => { (e.target as HTMLElement).style.display = "none"; }} />
+              ? <img src={`${FILE_URL}/${c.imageId}`} alt={c.categoryName} style={{ width: "100%", height: "100%", objectFit: "cover" }} onError={(e) => { (e.target as HTMLElement).style.display = "none"; }} />
               : (c.icon ?? "🔧")}
           </div>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontWeight: 700, fontSize: 14 }}>{c.name}</div>
+            <div style={{ fontWeight: 700, fontSize: 14 }}>{c.categoryName}</div>
             {c.description && <div style={{ fontSize: 12, color: "#6B7280", marginTop: 2 }}>{c.description}</div>}
           </div>
           <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>

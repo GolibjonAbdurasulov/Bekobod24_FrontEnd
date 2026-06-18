@@ -4,9 +4,9 @@ import { api, FILE_URL } from "../api/client";
 
 interface ServiceCategory {
   id: number | string;
-  name: string;
+  categoryName: string;
   description?: string;
-  icon?: string;       // emoji yoki null
+  icon?: string;
   imageId?: string;
   imageUrl?: string;
 }
@@ -23,7 +23,7 @@ const ICON_MAP: Record<string, string> = {
 
 function catIcon(c: ServiceCategory): string {
   if (c.icon) return c.icon;
-  const key = c.name.toLowerCase().replace(/[^a-z]/g, "");
+  const key = c.categoryName?.toLowerCase().replace(/[^a-z]/g, "") ?? "";
   return ICON_MAP[key] ?? "🔧";
 }
 
@@ -74,12 +74,12 @@ export default function ServiceCategoriesPage() {
                 >
                   <div className="cat-icon" style={{ background: "#FFF1F2", overflow: "hidden" }}>
                     {url
-                      ? <img src={url} alt={c.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                      ? <img src={url} alt={c.categoryName} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                       : <span style={{ fontSize: 28 }}>{icon}</span>
                     }
                   </div>
                   <div>
-                    <div className="cat-title">{c.name}</div>
+                    <div className="cat-title">{c.categoryName}</div>
                     {c.description && <div className="cat-desc">{c.description}</div>}
                   </div>
                 </div>

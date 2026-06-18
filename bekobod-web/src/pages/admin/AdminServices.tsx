@@ -5,7 +5,7 @@ import FormField from "../../components/admin/FormField";
 
 interface ServiceCategory {
   id: number | string;
-  name: string;
+  categoryName: string;
 }
 
 const empty = {
@@ -97,7 +97,7 @@ export default function AdminServices() {
 
   // Kategoriya nomi topish
   const catName = (catId: any) =>
-    categories.find((c) => String(c.id) === String(catId))?.name ?? "";
+    categories.find((c) => String(c.id) === String(catId))?.categoryName ?? "";
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
@@ -149,7 +149,7 @@ export default function AdminServices() {
             <FormField label="Kategoriya" value={form.categoryId} onChange={f("categoryId")} as="select" required>
               <option value="">Tanlang...</option>
               {categories.map((c) => (
-                <option key={c.id} value={c.id}>{c.name}</option>
+                <option key={c.id} value={c.id}>{c.categoryName}</option>
               ))}
             </FormField>
           )}

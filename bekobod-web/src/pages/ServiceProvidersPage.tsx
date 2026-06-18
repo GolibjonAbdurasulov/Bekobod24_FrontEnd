@@ -4,7 +4,7 @@ import { api } from "../api/client";
 
 interface ServiceCategory {
   id: number | string;
-  name: string;
+  categoryName: string;
   icon?: string;
   description?: string;
 }
@@ -31,9 +31,9 @@ const ICON_MAP: Record<string, string> = {
   bogbon: "🌿", gardener: "🌿",
 };
 
-function resolveCatIcon(name: string, icon?: string): string {
+function resolveCatIcon(name: string | undefined, icon?: string): string {
   if (icon) return icon;
-  const key = name.toLowerCase().replace(/[^a-z]/g, "");
+  const key = (name ?? "").toLowerCase().replace(/[^a-z]/g, "");
   return ICON_MAP[key] ?? "🔧";
 }
 
@@ -60,18 +60,18 @@ export default function ServiceProvidersPage() {
 
     // Kategoriya ma'lumotini olish (nom va icon uchun)
     api.get<ServiceCategory>(`/ServiceCategory/GetById/${categoryId}`)
-      .then((r) => setCategory(r.data))
+      .then((r) => setCategory((r.data as any)?.data ?? r.data))
       .catch(() => setCategory(null));
 
     // Kategoriyaga tegishli servicelar
     api.get<Service[]>(`/Service/GetAll?categoryId=${categoryId}`)
-      .then((r) => setServices(r.data))
+      .then((r) => setServices((r.data as any)?.data ?? r.data))
       .catch(() => setServices([]))
       .finally(() => setLoading(false));
   }, [categoryId]);
 
-  const catIcon = category ? resolveCatIcon(category.name, category.icon) : "🔧";
-  const catName = category?.name ?? "Xizmatlar";
+  const catIcon = category ? resolveCatIcon(category.categoryName, category.icon) : "🔧";
+  const catName = category?.categoryName ?? "Xizmatlar";
   const hasContact = (s: Service) => !!(s.phone || s.telegramUsername);
 
   return (
