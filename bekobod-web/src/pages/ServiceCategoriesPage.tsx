@@ -40,7 +40,7 @@ export default function ServiceCategoriesPage() {
 
   useEffect(() => {
     api.get<ServiceCategory[]>("/ServiceCategory/GetAll")
-      .then((r) => setCategories(r.data))
+      .then((r) => setCategories(Array.isArray(r.data) ? r.data : (r.data as any)?.data ?? []))
       .catch(() => setCategories([]))
       .finally(() => setLoading(false));
   }, []);

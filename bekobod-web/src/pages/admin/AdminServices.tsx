@@ -32,7 +32,10 @@ export default function AdminServices() {
   useEffect(() => {
     load();
     api.get<ServiceCategory[]>("/ServiceCategory/GetAll")
-      .then((r) => setCategories(r.data))
+      .then((r) => {
+        const data = Array.isArray(r.data) ? r.data : (r.data as any)?.data ?? [];
+        setCategories(data);
+      })
       .catch(() => {});
   }, []);
 
