@@ -3,7 +3,7 @@ import { api, FILE_URL } from "../../api/client";
 import AdminModal from "../../components/admin/AdminModal";
 import FormField from "../../components/admin/FormField";
 
-const empty = { name: "", description: "", icon: "", imageId: "" };
+const empty = { categoryName: "", icon: "", imageId: "" };
 
 export default function AdminServiceCategories() {
   const [cats, setCats] = useState<any[]>([]);
@@ -34,18 +34,17 @@ export default function AdminServiceCategories() {
   const openCreate = () => { setEditing(null); setForm(empty); setModal(true); };
   const openEdit = (c: any) => {
     setEditing(c);
-    setForm({ name: c.categoryName, description: c.description ?? "", icon: c.icon ?? "", imageId: c.imageId ?? "" });
+    setForm({ categoryName: c.categoryName, icon: c.icon ?? "", imageId: c.imageId ?? "" });
     setModal(true);
   };
 
   const save = async () => {
-    if (!form.name.trim()) return alert("Nomni kiriting");
+    if (!form.categoryName.trim()) return alert("Nomni kiriting");
     if (!form.imageId) return alert("Rasm yuklash majburiy");
     setSaving(true);
     try {
       const body: any = {
-        name: form.name,
-        description: form.description || null,
+        categoryName: form.categoryName,
         icon: form.icon || null,
         imageId: form.imageId || null,
       };
@@ -96,7 +95,6 @@ export default function AdminServiceCategories() {
           </div>
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ fontWeight: 700, fontSize: 14 }}>{c.categoryName}</div>
-            {c.description && <div style={{ fontSize: 12, color: "#6B7280", marginTop: 2 }}>{c.description}</div>}
           </div>
           <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
             <button onClick={() => openEdit(c)} style={{ background: "#EFF6FF", color: "#2563EB", border: "none", borderRadius: 8, padding: "7px 12px", fontWeight: 600, fontSize: 13, cursor: "pointer" }}>✏️</button>
@@ -112,8 +110,7 @@ export default function AdminServiceCategories() {
           onSave={save}
           saving={saving}
         >
-          <FormField label="Nomi" value={form.name} onChange={f("name")} placeholder="Masalan: Elektrik" required />
-          <FormField label="Tavsif" value={form.description} onChange={f("description")} placeholder="Qisqacha tavsif" as="textarea" />
+          <FormField label="Nomi" value={form.categoryName} onChange={f("categoryName")} placeholder="Masalan: Elektrik" required />
           <FormField label="Emoji (ixtiyoriy)" value={form.icon} onChange={f("icon")} placeholder="⚡" />
 
           <div>

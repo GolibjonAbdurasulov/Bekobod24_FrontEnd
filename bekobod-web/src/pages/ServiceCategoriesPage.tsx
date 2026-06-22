@@ -36,6 +36,7 @@ function imgUrl(c: ServiceCategory): string | null {
 export default function ServiceCategoriesPage() {
   const nav = useNavigate();
   const [categories, setCategories] = useState<ServiceCategory[]>([]);
+  const [imgErrors, setImgErrors] = useState<Set<number | string>>(new Set());
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -73,8 +74,8 @@ export default function ServiceCategoriesPage() {
                   onClick={() => nav(`/services/${c.id}`)}
                 >
                   <div className="cat-icon" style={{ background: "#FFF1F2", overflow: "hidden" }}>
-                    {url
-                      ? <img src={url} alt={c.categoryName} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                    {url && !imgErrors.has(c.id)
+                      ? <img src={url} alt={c.categoryName} style={{ width: "100%", height: "100%", objectFit: "cover" }} onError={() => setImgErrors((p) => new Set(p).add(c.id))} />
                       : <span style={{ fontSize: 28 }}>{icon}</span>
                     }
                   </div>

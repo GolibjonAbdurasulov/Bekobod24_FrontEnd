@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { api } from "../api/client";
+import { api, FILE_URL } from "../api/client";
 
 interface ServiceCategory {
   id: number | string;
@@ -19,6 +19,8 @@ interface Service {
   telegramUsername?: string;
   requiresBooking?: boolean;
   categoryId?: number | string;
+  imageUrl?: string;
+  imageId?: string;
 }
 
 // Kategoriya nomiga qarab fallback emoji
@@ -37,6 +39,12 @@ function resolveCatIcon(name: string | undefined, icon?: string): string {
   return ICON_MAP[key] ?? "🔧";
 }
 
+function imgUrl(service: Service): string | null {
+  if (service.imageUrl && service.imageUrl.startsWith("https://")) return service.imageUrl;
+  if (!service.imageId) return null;
+  return `${FILE_URL}/${service.imageId}`;
+}
+
 function cleanPhone(phone: string): string {
   return phone.replace(/\s+/g, "");
 }
@@ -53,6 +61,7 @@ export default function ServiceProvidersPage() {
   const [category, setCategory] = useState<ServiceCategory | null>(null);
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
+  const [imgErrors, setImgErrors] = useState<Set<string>>(new Set());
   const [contactSheet, setContactSheet] = useState<ContactSheet>(null);
 
   useEffect(() => {
@@ -97,8 +106,13 @@ export default function ServiceProvidersPage() {
           ) : (
             services.map((s) => (
               <div key={s.id} className="provider-card">
-                <div className="provider-avatar">
-                  <span>{catIcon}</span>
+                <div className="provider-avatar" style={{ overflow: "hidden" }}>
+                  {(() => {
+                    const url = imgUrl(s);
+                    return url && !imgErrors.has(String(s.id))
+                      ? <img src={url} alt={s.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} onError={() => setImgErrors((p) => new Set(p).add(String(s.id)))} />
+                      : <span>{catIcon}</span>
+                  })()}
                 </div>
 
                 <div className="provider-info" style={{ flex: 1, minWidth: 0 }}>
