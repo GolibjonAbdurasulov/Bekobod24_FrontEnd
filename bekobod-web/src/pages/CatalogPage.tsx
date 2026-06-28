@@ -33,6 +33,61 @@ function imgUrl(item: StoreOrCat | Product): string | null {
   return `${FILE_URL}/${item.imageId}`;
 }
 
+function ProductDetail({ product, cart, storeId, storeName, onClose }: {
+  product: Product;
+  cart: CartStore;
+  storeId: string;
+  storeName: string;
+  onClose: () => void;
+}) {
+  const qty = cart.items.find((i) => i.productId === product.id)?.quantity ?? 0;
+  const url = imgUrl(product);
+
+  return (
+    <div onClick={onClose} style={{
+      position: "fixed", inset: 0, zIndex: 100, background: "rgba(0,0,0,0.45)",
+      display: "flex", alignItems: "flex-end", justifyContent: "center",
+    }}>
+      <div onClick={(e) => e.stopPropagation()} style={{
+        background: "white", borderRadius: "20px 20px 0 0", width: "100%", maxWidth: 500,
+        maxHeight: "85dvh", overflowY: "auto", padding: "24px 20px 28px",
+      }}>
+        <div style={{ width: 40, height: 4, background: "#E5E7EB", borderRadius: 4, margin: "0 auto 16px" }} />
+
+        {url && (
+          <div style={{ width: "100%", height: 200, borderRadius: 14, overflow: "hidden", marginBottom: 16, background: "#F3F4F6" }}>
+            <img src={url} alt={product.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+          </div>
+        )}
+
+        <h2 style={{ fontSize: 20, fontWeight: 700, margin: 0 }}>{product.name}</h2>
+        {product.description && (
+          <p style={{ fontSize: 14, color: "#6B7280", margin: "8px 0 0", lineHeight: 1.5, whiteSpace: "pre-wrap" }}>{product.description}</p>
+        )}
+        <div style={{ fontSize: 24, fontWeight: 800, color: "#2563EB", marginTop: 12 }}>
+          {Number(product.price).toLocaleString()} so'm
+        </div>
+
+        {product.isAvailable && (
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 16, marginTop: 20, padding: "16px 0", borderTop: "1px solid #F3F4F6" }}>
+            <button className="qty-btn" style={{ width: 44, height: 44, fontSize: 20 }}
+              onClick={() => { if (qty > 0) cart.dec(product.id); }}>−</button>
+            <span style={{ fontSize: 22, fontWeight: 700, minWidth: 40, textAlign: "center" }}>{qty}</span>
+            <button className="qty-btn" style={{ width: 44, height: 44, fontSize: 20 }}
+              onClick={() => {
+                if (qty === 0) cart.add({ productId: product.id, name: product.name, price: product.price, storeId, storeName });
+                else cart.inc(product.id);
+              }}>+</button>
+          </div>
+        )}
+        {!product.isAvailable && (
+          <div style={{ textAlign: "center", padding: 16, color: "#DC2626", fontWeight: 600 }}>Mavjud emas</div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function BackIcon() {
   return (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
@@ -55,11 +110,12 @@ function ProductList({
   storeName: string;
 }) {
   const [imgErrors, setImgErrors] = useState<Set<string>>(new Set());
+  const [detailProduct, setDetailProduct] = useState<Product | null>(null);
   const nav = useNavigate();
 
   const qtyMap = useMemo(() => {
     const map = new Map<string, number>();
-    for (const item of cart.items) map.set(item.id, item.quantity);
+    for (const item of cart.items) map.set(item.productId, item.quantity);
     return map;
   }, [cart.items]);
 
@@ -82,7 +138,7 @@ function ProductList({
             {showImg && (
               <img className="product-img" src={url!} alt={p.name} onError={() => handleImgError(p.id)} />
             )}
-            <div className="product-info">
+            <div className="product-info" onClick={() => setDetailProduct(p)} style={{ cursor: "pointer" }}>
               <div className="name">{p.name}</div>
               {p.description && <div className="desc">{p.description}</div>}
               <div className="price">{Number(p.price).toLocaleString()} so'm</div>
@@ -91,7 +147,7 @@ function ProductList({
               <span className="product-unavailable">Mavjud emas</span>
             ) : itemQty === 0 ? (
               <button className="product-add-btn"
-                onClick={() => cart.add({ id: p.id, name: p.name, price: p.price, storeId, storeName })}>+</button>
+                onClick={() => cart.add({ productId: p.id, name: p.name, price: p.price, storeId, storeName })}>+</button>
             ) : (
               <div className="qty-control">
                 <button className="qty-btn" onClick={() => cart.dec(p.id)}>−</button>
@@ -102,6 +158,16 @@ function ProductList({
           </div>
         );
       })}
+
+      {detailProduct && (
+        <ProductDetail
+          product={detailProduct}
+          cart={cart}
+          storeId={storeId}
+          storeName={storeName}
+          onClose={() => setDetailProduct(null)}
+        />
+      )}
 
       {hasCheckout && (
         <div className="checkout-bar">

@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const BASE_URL = import.meta.env.VITE_API_URL ?? "https://back.bekobod24.uz/api";
+const BASE_URL = import.meta.env.VITE_API_URL ?? "https://dennis-mas-supplemental-forming.trycloudflare.com/api";
 
 export const API_BASE = BASE_URL.replace("/api", "");
 export const FILE_URL = `${BASE_URL}/File/DownloadFile`;

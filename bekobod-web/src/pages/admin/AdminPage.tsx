@@ -7,6 +7,7 @@ import AdminProductCategories from "./AdminProductCategories";
 import AdminServices from "./AdminServices";
 import AdminServiceCategories from "./AdminServiceCategories";
 import AdminUsers from "./AdminUsers";
+import AdminAddresses from "./AdminAddresses";
 
 const TABS = [
   { key: "orders",      label: "Buyurtmalar",       icon: "📋" },
@@ -16,6 +17,7 @@ const TABS = [
   { key: "services",    label: "Xizmatlar",          icon: "🔧" },
   { key: "svcats",      label: "Xizmat kat.",        icon: "🗂️" },
   { key: "users",       label: "Foydalanuvchilar",   icon: "👥" },
+  { key: "addresses",   label: "Manzillar",           icon: "📍" },
 ];
 
 export default function AdminPage() {
@@ -71,6 +73,7 @@ export default function AdminPage() {
           {tab === "services"   && <AdminServices />}
           {tab === "svcats"     && <AdminServiceCategories />}
           {tab === "users"      && <AdminUsers />}
+          {tab === "addresses" && <AdminAddresses />}
         </div>
       </div>
     </AdminGuard>

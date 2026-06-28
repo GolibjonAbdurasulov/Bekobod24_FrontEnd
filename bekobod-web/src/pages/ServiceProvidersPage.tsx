@@ -14,10 +14,8 @@ interface Service {
   name: string;
   description?: string;
   storeName?: string;
-  price: number;
   phone?: string;
   telegramUsername?: string;
-  requiresBooking?: boolean;
   categoryId?: number | string;
   imageUrl?: string;
   imageId?: string;
@@ -124,7 +122,6 @@ export default function ServiceProvidersPage() {
                       {s.description}
                     </div>
                   )}
-                  <div className="pprice">{Number(s.price).toLocaleString()} so'm</div>
                 </div>
 
                 {hasContact(s) ? (
@@ -138,14 +135,6 @@ export default function ServiceProvidersPage() {
                   >
                     Bog'lanish
                   </button>
-                ) : s.requiresBooking ? (
-                  <span style={{
-                    fontSize: 11, color: "#D97706", background: "#FFF7ED",
-                    padding: "4px 8px", borderRadius: 8, fontWeight: 600,
-                    whiteSpace: "nowrap", flexShrink: 0,
-                  }}>
-                    Bron talab
-                  </span>
                 ) : null}
               </div>
             ))
@@ -171,9 +160,6 @@ export default function ServiceProvidersPage() {
                 {contactSheet.service.description}
               </div>
             )}
-            <div style={{ fontSize: 15, fontWeight: 700, color: "#2563EB", marginBottom: 20 }}>
-              {Number(contactSheet.service.price).toLocaleString()} so'm/soat
-            </div>
 
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
               {contactSheet.service.phone && (
